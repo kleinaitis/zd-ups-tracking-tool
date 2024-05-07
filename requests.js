@@ -14,16 +14,30 @@ async function getTicketSearchResults() {
 
     const responseData = await response.json();
     const tickets = responseData.results;
-    const ticketInfo = [];
+    const ticketInfo = new Map();
     for (const ticket of tickets) {
-        ticketInfo.push([ticket["id"], ticket["custom_fields"][0]["value"]]);
+        ticketInfo.set(ticket["id"], ticket["custom_fields"][0]["value"]);
     }
     return ticketInfo;
 }
 
 async function getUPSTrackingStatus() {
     const trackingNumbers = await getTicketSearchResults();
-    console.log(trackingNumbers);
+
+    for (const [ticketID,trackingID] of trackingNumbers) {
+        const response = await fetch(`https://onlinetools.ups.com/api/track/v1/details/${trackingID}`, {
+            method: "GET",
+            redirect: "follow",
+            headers: {
+                transId: '1234',
+                transactionSrc: 'testing',
+                Authorization: `Bearer ${process.env.UPS_ACCESS_TOKEN}`
+            },
+        });
+        const data = await response.json();
+        const ticketStatus = data.trackResponse.shipment[0].package[0].currentStatus.description
+        console.log(ticketID, ticketStatus)
+    }
 }
 
 getUPSTrackingStatus();
