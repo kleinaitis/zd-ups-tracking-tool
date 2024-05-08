@@ -46,7 +46,6 @@ async function getTicketSearchResults() {
         ticketInfo.push(ticketObject)
     }
     return ticketInfo;
-
 }
 
 async function getUPSTrackingStatus() {
@@ -65,8 +64,37 @@ async function getUPSTrackingStatus() {
         });
         const data = await response.json();
         ticket.shipmentStatus = data.trackResponse.shipment[0].package[0].currentStatus.description
-        console.log(ticket)
+    }
+    return ticketList;
+}
+
+async function updateZendeskTicket() {
+    const ticketList = await getUPSTrackingStatus();
+
+    for (const ticket of ticketList) {
+        const body = JSON.stringify({
+            "ticket": {
+                "comment": {
+                    "body": `UPS Tracking Tool:\n ${ticket.upsTrackingID} is "${ticket.shipmentStatus}"`,
+                    "public": false
+                },
+                "status": "open"
+            }
+        })
+        const response = await fetch(`https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/api/v2/tickets/${ticket.ticketid}`, {
+            method: "PUT",
+            redirect: "follow",
+
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Basic ${process.env.ZENDESK_CREDENTIALS}`,
+                "Accept": "application/json",
+            },
+            body: body
+        });
+        const data = await response.json();
+        console.log(data)
     }
 }
 
-getUPSTrackingStatus();
+updateZendeskTicket();
