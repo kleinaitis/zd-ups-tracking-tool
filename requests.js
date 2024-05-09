@@ -22,7 +22,7 @@ async function generateUPSToken() {
 
 
 async function getTicketSearchResults() {
-    const query = encodeURIComponent(process.env.CUSTOM_FIELD)
+    const query = encodeURIComponent(process.env.CUSTOM_FIELD_QUERY)
 
     const response = await fetch(`https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/api/v2/search?query=${query}`, {
         method: "GET",
@@ -43,7 +43,9 @@ async function getTicketSearchResults() {
             upsTrackingID: ticket["custom_fields"][0]["value"],
             shipmentStatus: ""
         }
-        ticketInfo.push(ticketObject)
+        if (ticket.upsTrackingID !== '' ||  null) {
+            ticketInfo.push(ticketObject)
+        }
     }
     return ticketInfo;
 }
@@ -62,8 +64,12 @@ async function getUPSTrackingStatus() {
                 Authorization: `Bearer ${upsAccessToken}`
             },
         });
-        const data = await response.json();
-        ticket.shipmentStatus = data.trackResponse.shipment[0].package[0].currentStatus.description
+        if (response.ok) {
+            const data =  await response.json();
+            ticket.shipmentStatus = data.trackResponse.shipment[0].package[0].currentStatus.description
+        } else {
+            ticketList.pop()
+        }
     }
     return ticketList;
 }
@@ -72,12 +78,19 @@ async function updateZendeskTicket() {
     const ticketList = await getUPSTrackingStatus();
 
     for (const ticket of ticketList) {
+
+        let custom_status = ''
+            if (ticket.shipmentStatus !== "Delivered") {
+                custom_status = `${ticket.upsTrackingID}`
+                }
+
         const body = JSON.stringify({
             "ticket": {
                 "comment": {
                     "body": `UPS Tracking Tool:\n ${ticket.upsTrackingID} is "${ticket.shipmentStatus}"`,
                     "public": false
                 },
+                "custom_fields": [{"id": `${process.env.CUSTOM_FIELD_ID}`, "value":`${custom_status}`}],
                 "status": "open"
             }
         })
