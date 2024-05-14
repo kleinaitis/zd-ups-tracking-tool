@@ -35,15 +35,25 @@ async function getTicketSearchResults() {
 
     const responseData = await response.json();
     const tickets = responseData.results;
+
     const ticketInfo = []
+    const zendeskCustomFieldID = parseInt(process.env.CUSTOM_FIELD_ID);
 
     for (const ticket of tickets) {
+        let upsTrackingID = null;
+
+        for (const customField of ticket.custom_fields) {
+            if (customField.id === zendeskCustomFieldID) {
+             upsTrackingID = customField.value
+            break
+            }
+        }
         let ticketObject = {
             ticketid: ticket["id"],
-            upsTrackingID: ticket["custom_fields"][0]["value"],
+            upsTrackingID: upsTrackingID,
             shipmentStatus: ""
         }
-        if (ticket.upsTrackingID !== '' ||  null) {
+        if (upsTrackingID !== '' && upsTrackingID !== null) {
             ticketInfo.push(ticketObject)
         }
     }
