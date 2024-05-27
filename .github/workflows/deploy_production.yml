@@ -31,7 +31,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         run: |
-          docker build -f YOUR_PROJECT_FOLDER/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY .
+          docker build -f zd-ups-tracking-tool/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY
       - name: Update Lambda function with latest ECR image
         env:
