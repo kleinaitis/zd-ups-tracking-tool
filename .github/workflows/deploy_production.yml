@@ -30,9 +30,23 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          ZENDESK_CREDENTIALS: ${{ secrets.ZENDESK_CREDENTIALS }}
+          ZENDESK_SUBDOMAIN: ${{ secrets.ZENDESK_SUBDOMAIN }}
+          CUSTOM_FIELD_ID: ${{ secrets.CUSTOM_FIELD_ID }}
+          CUSTOM_FIELD_QUERY: ${{ secrets.CUSTOM_FIELD_QUERY }}
+          UPS_CLIENT_ID: ${{ secrets.UPS_CLIENT_ID }}
+          UPS_CLIENT_SECRET: ${{ secrets.UPS_CLIENT_SECRET }}
         run: |
+          echo "ZENDESK_CREDENTIALS=$ZENDESK_CREDENTIALS" >> .env
+          echo "ZENDESK_SUBDOMAIN=$ZENDESK_SUBDOMAIN" >> .env
+          echo "CUSTOM_FIELD_ID=$CUSTOM_FIELD_ID" >> .env
+          echo "CUSTOM_FIELD_QUERY=$CUSTOM_FIELD_QUERY" >> .env
+          echo "UPS_CLIENT_ID=$UPS_CLIENT_ID" >> .env
+          echo "UPS_CLIENT_SECRET=$UPS_CLIENT_SECRET" >> .env 
+          
           docker build -f ./Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY
+
       - name: Update Lambda function with latest ECR image
         env:
           LAMBDA_NAME: ${{ secrets.LAMBDA_NAME }}
