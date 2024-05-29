@@ -81,7 +81,7 @@ async function getUPSTrackingStatus() {
             ticketList.pop()
         }
     }
-    console.log(ticketList);
+    return ticketList;
 }
 
 async function updateZendeskTicket() {
@@ -119,4 +119,4 @@ async function updateZendeskTicket() {
     }
 }
 
-getUPSTrackingStatus();
+updateZendeskTicket();
