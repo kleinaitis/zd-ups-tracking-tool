@@ -81,7 +81,7 @@ async function getUPSTrackingStatus() {
             ticketList.pop()
         }
     }
-    return ticketList;
+     return ticketList;
 }
 
 async function updateZendeskTicket() {
@@ -104,18 +104,29 @@ async function updateZendeskTicket() {
                 "status": "open"
             }
         })
-        const response = await fetch(`https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/api/v2/tickets/${ticket.ticketid}`, {
-            method: "PUT",
-            redirect: "follow",
 
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Basic ${process.env.ZENDESK_CREDENTIALS}`,
-                "Accept": "application/json",
-            },
-            body: body
-        });
-        return await response.json();
+        try {
+            const response = await fetch(`https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/api/v2/tickets/${ticket.ticketid}`, {
+                method: "PUT",
+                redirect: "follow",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Basic ${process.env.ZENDESK_CREDENTIALS}`,
+                    "Accept": "application/json",
+                },
+                body: body
+            });
+
+            if (!response.ok) {
+                console.error(`Failed to update ticket ${ticket.ticketid}. Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log(data)
+        } catch (error) {
+            console.error(`Error updating ticket ${ticket.ticketid}:`, error.message);
+        }
     }
 }
 
