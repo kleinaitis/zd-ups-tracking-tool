@@ -85,11 +85,11 @@ async function getUPSTrackingStatus() {
             console.error('Error fetching UPS API:', error);
         }
     }
-    console.log(ticketList);
     return ticketList;
 }
 async function updateZendeskTicket() {
     const ticketList = await getUPSTrackingStatus();
+    const results = [];
 
     for (const ticket of ticketList) {
 
@@ -124,13 +124,15 @@ async function updateZendeskTicket() {
 
             if (!response.ok) {
                 console.error(`Failed to update ticket ${ticket.ticketid}. Status: ${response.status}`);
+            } else {
+                const data = await response.json();
+                results.push(data); // Collect the results
             }
-
-            const data = await response.json();
-            console.log(data)
         } catch (error) {
             console.error(`Error updating ticket ${ticket.ticketid}:`, error.message);
         }
     }
+
+    return results;
 }
-module.exports = { getUPSTrackingStatus };
+module.exports = { updateZendeskTicket };
