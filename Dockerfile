@@ -7,6 +7,6 @@ COPY package*.json ./
 
 RUN npm install
 
-COPY . .
+COPY . ${LAMBDA_TASK_ROOT}
 
 CMD [ "index.handler" ]
