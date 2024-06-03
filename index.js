@@ -1,12 +1,12 @@
-const { getUPSTrackingStatus } = require('./requests.js');
+const { updateZendeskTicket } = require('./requests.js');
 
 exports.handler = async (event) => {
     try {
-        const trackingStatus = await getUPSTrackingStatus();
+        const zendeskTicketsUpdated = await updateZendeskTicket();
 
         const response = {
             statusCode: 200,
-            body: JSON.stringify(trackingStatus),
+            body: JSON.stringify(zendeskTicketsUpdated),
         };
         return response;
     } catch (error) {
