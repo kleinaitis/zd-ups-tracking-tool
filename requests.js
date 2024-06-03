@@ -65,25 +65,29 @@ async function getUPSTrackingStatus() {
     const upsAccessToken = await generateUPSToken();
 
     for (const ticket of ticketList) {
-        const response = await fetch(`https://onlinetools.ups.com/api/track/v1/details/${ticket.upsTrackingID}`, {
-            method: "GET",
-            redirect: "follow",
-            headers: {
-                transId: '1234',
-                transactionSrc: 'testing',
-                Authorization: `Bearer ${upsAccessToken}`
-            },
-        });
-        if (response.ok) {
-            const data =  await response.json();
-            ticket.shipmentStatus = data.trackResponse.shipment[0].package[0].currentStatus.description
-        } else {
-            ticketList.pop()
+        try {
+            const response = await fetch(`https://onlinetools.ups.com/api/track/v1/details/${ticket.upsTrackingID}`, {
+                method: "GET",
+                redirect: "follow",
+                headers: {
+                    transId: '1234',
+                    transactionSrc: 'testing',
+                    Authorization: `Bearer ${upsAccessToken}`
+                },
+            });
+            if (response.ok) {
+                const data =  await response.json();
+                ticket.shipmentStatus = data.trackResponse.shipment[0].package[0].currentStatus.description
+            } else {
+                ticketList.pop()
+            }
+        } catch (error) {
+            console.error('Error fetching UPS API:', error);
         }
     }
-     return ticketList;
+    console.log(ticketList);
+    return ticketList;
 }
-
 async function updateZendeskTicket() {
     const ticketList = await getUPSTrackingStatus();
 
@@ -129,5 +133,4 @@ async function updateZendeskTicket() {
         }
     }
 }
-
-updateZendeskTicket();
+module.exports = { getUPSTrackingStatus };
