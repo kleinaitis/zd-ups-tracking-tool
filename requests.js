@@ -105,7 +105,7 @@ async function updateZendeskTicket() {
                     "public": false
                 },
                 "custom_fields": [{"id": `${process.env.CUSTOM_FIELD_ID}`, "value":`${custom_status}`}],
-                "status": "open"
+                "status": "hold"
             }
         })
 
