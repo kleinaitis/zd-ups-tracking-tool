@@ -22,7 +22,7 @@ async function generateUPSToken() {
 
 
 async function getTicketSearchResults() {
-    const query = encodeURIComponent(process.env.CUSTOM_FIELD_QUERY)
+    const query = encodeURIComponent(`${process.env.CUSTOM_FIELD_QUERY} status<solved`);
 
     const response = await fetch(`https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/api/v2/search?query=${query}`, {
         method: "GET",
