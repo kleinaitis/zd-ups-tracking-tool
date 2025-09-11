@@ -85,7 +85,7 @@ async function getUPSTrackingStatus() {
             console.error('Error fetching UPS API:', error);
         }
     }
-    return ticketList;
+        return ticketList;
 }
 async function updateZendeskTicket() {
     const ticketList = await getUPSTrackingStatus();
@@ -98,6 +98,8 @@ async function updateZendeskTicket() {
                 custom_status = `${ticket.upsTrackingID}`
                 }
 
+        const openStatuses = ["On the Way", "Delivered", "Delay"];
+
         const body = JSON.stringify({
             "ticket": {
                 "comment": {
@@ -105,7 +107,7 @@ async function updateZendeskTicket() {
                     "public": false
                 },
                 "custom_fields": [{"id": `${process.env.CUSTOM_FIELD_ID}`, "value":`${custom_status}`}],
-                "status": "hold"
+                "status": openStatuses.includes(ticket.shipmentStatus) ? "open" : "hold"
             }
         })
 
