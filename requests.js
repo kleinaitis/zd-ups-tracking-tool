@@ -92,12 +92,7 @@ async function updateZendeskTicket() {
     const results = [];
 
     for (const ticket of ticketList) {
-
-        let custom_status = ''
-            if (ticket.shipmentStatus !== "Delivered") {
-                custom_status = `${ticket.upsTrackingID}`
-                }
-
+        const custom_status = ticket.shipmentStatus !== "Delivered" ? ticket.upsTrackingID : "";
         const openStatuses = ["On the Way", "Delivered", "Delay"];
 
         const body = JSON.stringify({
