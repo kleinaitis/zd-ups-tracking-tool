@@ -91,9 +91,11 @@ async function updateZendeskTicket() {
     const ticketList = await getUPSTrackingStatus();
     const results = [];
 
+    const openStatuses = ["On the Way", "Delivered", "Delay"];
+
     for (const ticket of ticketList) {
         const custom_status = ticket.shipmentStatus !== "Delivered" ? ticket.upsTrackingID : "";
-        const openStatuses = ["On the Way", "Delivered", "Delay"];
+        const status = openStatuses.includes(ticket.shipmentStatus) ? "open" : "hold";
 
         const body = JSON.stringify({
             "ticket": {
@@ -102,7 +104,7 @@ async function updateZendeskTicket() {
                     "public": false
                 },
                 "custom_fields": [{"id": `${process.env.CUSTOM_FIELD_ID}`, "value":`${custom_status}`}],
-                "status": openStatuses.includes(ticket.shipmentStatus) ? "open" : "hold"
+                status
             }
         })
 
