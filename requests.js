@@ -91,10 +91,14 @@ async function updateZendeskTicket() {
     const ticketList = await getUPSTrackingStatus();
     const results = [];
 
+    const openStatuses = ["On the Way", "Delivered", "Delay"];
+
     for (const ticket of ticketList) {
 
         let custom_status = [];
         let ticketBody = [];
+        let overallStatus = "hold"; // default
+
 
         // Map.forEach parameters are v,k rather than k,v
         ticket.shipmentInformation.forEach((shipmentStatus, trackingNumber) => {
@@ -102,7 +106,11 @@ async function updateZendeskTicket() {
                 custom_status.push(`\n${trackingNumber}`)
             }
             ticketBody.push(`\n${trackingNumber} is "${shipmentStatus}"`)
-        })
+
+            if (openStatuses.includes(shipmentStatus)) {
+                overallStatus = "open";
+            }
+        });
 
         const body = JSON.stringify({
             "ticket": {
@@ -111,7 +119,7 @@ async function updateZendeskTicket() {
                     "public": false
                 },
                 "custom_fields": [{"id": `${process.env.CUSTOM_FIELD_ID}`, "value":`${custom_status.toString()}`}],
-                "status": "open"
+                "status": overallStatus
             }
         })
 
